@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksoap_kit=self.webpackChunksoap_kit||[]).push([[777],{8372:t=>{t.exports=JSON.parse('{"metadata":{"permalink":"/SoapKit-Doc/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
