@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunksoap_kit=self.webpackChunksoap_kit||[]).push([[1903],{1912:o=>{o.exports=JSON.parse('{"blogBasePath":"/SoapKit-Doc/blog","blogTitle":"Blog","authorsListPath":"/SoapKit-Doc/blog/authors"}')}}]);
