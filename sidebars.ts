@@ -19,7 +19,10 @@ const sidebars: SidebarsConfig = {
       label: 'Editor Tools',
       items: [
         'editor-tools/debug-window',
+        'editor-tools/settings-window',
         'editor-tools/asset-creator',
+        'editor-tools/asset-cleaner',
+        'editor-tools/quick-actions',
         'editor-tools/binding-system',
         'editor-tools/dependency-visualizer',
         'editor-tools/performance-analyzer',

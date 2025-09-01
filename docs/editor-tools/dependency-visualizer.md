@@ -18,7 +18,7 @@ The Dependency Visualizer offers multiple view modes to analyze your SOAP archit
 ### Key Features
 
 - 🗺️ **Interactive Dependency Maps** - Visual relationship graphs with real-time updates
-- 🎯 **Multiple View Modes** - GameObject-centric, Asset-centric, and Graph views
+- 🎯 **Multiple View Modes** - GameObject and Asset
 - 🔍 **Advanced Filtering** - Filter by asset type, usage patterns, or specific components  
 - 📊 **Usage Analytics** - Detailed metrics on asset usage and dependency depth
 - 🚨 **Hotspot Detection** - Automatic identification of performance bottlenecks

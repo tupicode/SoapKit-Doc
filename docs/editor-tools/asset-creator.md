@@ -273,7 +273,6 @@ The Asset Creator includes professionally designed templates for common game sys
 **Memory Management:**
 - Clear asset creator cache regularly: `Tools > SoapKit > Clear Cache`
 - Close Asset Creator window when not in use
-- Use `AssetDatabase.Refresh()` after large batch operations
 
 ---
 

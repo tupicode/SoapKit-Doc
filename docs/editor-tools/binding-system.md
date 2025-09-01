@@ -125,7 +125,7 @@ SOAPBind Component Inspector:
    
 🔧 Controls
    ├── ➕ Add Binding        // Create new binding
-   ├── 📊 Performance Info    // Show performance stats  
+   ├── 📊 Performance Info   // Show performance stats  
    ├── 🐞 Debug Mode         // Enable debugging
    └── ⚙️ Auto Optimize      // Enable performance optimization
 ```

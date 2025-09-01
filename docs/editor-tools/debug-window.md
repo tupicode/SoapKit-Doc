@@ -31,47 +31,9 @@ The Debug Window consists of several tabs, each providing specific debugging cap
 
 The Monitor tab provides a live dashboard of your SOAP systems:
 
-![Monitor Tab Screenshot](../../static/img/debug-monitor.png)
-
-**Key Features:**
-- **Variable Values**: Live updates of all variable values during gameplay
-- **Event Activity**: Real-time event firing with frequency indicators
-- **System Status**: Health indicators for each SOAP system
-- **Performance Metrics**: CPU usage, memory allocation, and event throughput
-
-### Variable Monitoring
-
-```csharp
-// Variables appear automatically in the monitor
-public class PlayerHealth : MonoBehaviour
-{
-    [SerializeField] private IntVariable health; // Shows in Variables section
-    [SerializeField] private FloatVariable speed; // Shows in Variables section
-    
-    // Values update in real-time during play mode
-}
-```
-
-**Monitor Display:**
-```
-📊 Variables
-├── PlayerHealth (IntVariable): 85/100
-├── PlayerSpeed (FloatVariable): 5.2
-├── PlayerName (StringVariable): "Hero"
-└── IsGamePaused (BoolVariable): false
-```
-
-### Event Activity Feed
-
-The activity feed shows recent event firings:
-
-```
-🎯 Recent Events (Last 50)
-[14:32:15] OnHealthChanged(85) → 3 listeners
-[14:32:14] OnPlayerMoved(Vector3(2,0,3)) → 5 listeners  
-[14:32:12] OnEnemyDied() → 7 listeners
-[14:32:10] OnScoreChanged(1250) → 2 listeners
-```
+<div style={{textAlign: 'center'}}>
+  <img src={require('@site/static/img/debug-monitor.png').default} alt="Monitor Tab Screenshot" style={{width: '500px'}} />
+</div>
 
 **Event Information:**
 - **Timestamp**: When the event was raised
@@ -85,7 +47,9 @@ The activity feed shows recent event firings:
 
 Test any event manually without requiring gameplay triggers:
 
-![Events Tab Screenshot](../../static/img/debug-events.png)
+<div style={{textAlign: 'center'}}>
+  <img src={require('@site/static/img/debug-events.png').default} alt="Events Tab Screenshot" style={{width: '500px'}} />
+</div>
 
 **Features:**
 - **Event List**: All events in your project with current listener counts

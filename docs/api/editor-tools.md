@@ -206,7 +206,100 @@ public class SOAPPerformanceTester
 
 ---
 
-## Asset Creation Tools
+## Asset Management Tools
+
+### SOAPAssetCleanerWindow
+
+Professional unused asset cleaner with advanced selection interface and safe deletion.
+
+```csharp
+public class SOAPAssetCleanerWindow : EditorWindow
+```
+
+#### Static Methods
+
+| Method | Description |
+|--------|-------------|
+| `ShowWindow()` | Opens the Asset Cleaner window with automatic scan |
+
+#### Menu Access
+- **Path**: `Tools > SoapKit > Quick Actions > Clean Unused Assets`
+- **Window**: `Window > SoapKit > Asset Cleaner`
+
+#### Features
+
+**Smart Detection**
+- Scans all ScriptableObjects in project for SOAP assets
+- Analyzes scene usage to identify truly unused assets
+- Progress bar for large projects with hundreds of assets
+- Handles missing/corrupted assets gracefully
+
+**Advanced Selection Interface**
+- Individual checkboxes for each unused asset
+- Tri-state "Select All" with mixed state support
+- "Apply to filtered only" vs "Apply to all" scope options
+- "Invert Selection" for complex selection patterns
+
+**Powerful Filtering & Sorting**
+- Real-time search by asset name, type, or path
+- Sort by Name, Type, or Path (ascending/descending)
+- Clear filter button for quick reset
+- Live filtering updates as you type
+
+**Visual Asset Information**
+- Asset icons from Unity's asset database
+- Full asset path display for precise identification
+- Type name display (IntVariable, BoolGameEvent, etc.)
+- Click asset name to select and ping in Project window
+
+**Safe Deletion Workflow**
+- Double confirmation dialog with asset preview
+- Shows up to 7 assets in confirmation, with "and X more" summary
+- Batch deletion with progress tracking
+- Detailed success/failure reporting
+- Automatic rescan after deletion
+
+**Additional Tools**
+- 📍 Ping button to locate asset in Project window
+- 🔎 Reveal button to show asset in Finder/Explorer
+- Asset count and selection summary in header
+- Warning about version control for recovery
+
+#### Usage Example
+
+```csharp
+// Open Asset Cleaner programmatically
+[MenuItem("Custom/Clean My Assets")]
+static void OpenAssetCleaner()
+{
+    SOAPAssetCleanerWindow.ShowWindow();
+}
+
+// Get unused assets programmatically
+public static List<ScriptableObject> GetUnusedSOAPAssets()
+{
+    var unused = new List<ScriptableObject>();
+    string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+    
+    foreach (string guid in guids)
+    {
+        string path = AssetDatabase.GUIDToAssetPath(guid);
+        var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+        
+        if (asset != null && SOAPKitMenu.IsSOAPAsset(asset))
+        {
+            if (!SOAPKitMenu.IsAssetUsedInScene(asset))
+            {
+                unused.Add(asset);
+            }
+        }
+    }
+    
+    return unused;
+}
+```
+
+---
 
 ### SOAPAssetCreator
 
@@ -417,50 +510,6 @@ public static class SOAPHierarchyOverlay
 - Context menu integration
 - Direct debugging access
 
-### SOAPSceneOverlay
-
-Scene view overlay with connection visualization and quick testing.
-
-```csharp
-public static class SOAPSceneOverlay
-```
-
-#### Static Methods
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `EnableSceneOverlay()` | - | Activates scene overlay |
-| `DisableSceneOverlay()` | - | Deactivates scene overlay |
-| `SetVisualizationMode(VisualizationMode mode)` | `VisualizationMode mode` | Changes visualization |
-| `HighlightAsset(ScriptableObject asset)` | `ScriptableObject asset` | Highlights asset connections |
-
-#### Visualization Modes
-
-| Mode | Description |
-|------|-------------|
-| `Connections` | Shows asset connection lines |
-| `Values` | Displays current variable values |
-| `Events` | Shows event flow visualization |
-| `Dependencies` | Highlights dependency chains |
-
-#### Menu Access
-- **Path**: `Window > SoapKit > Scene Overlay > ...`
-- **Toggle**: `Alt+S` (Windows) / `Option+S` (Mac)
-
-#### Features
-
-**Connection Visualization**
-- Animated connection lines
-- Color-coded by asset type
-- Interactive hover information
-- Click-to-navigate functionality
-
-**Quick Testing**
-- Scene-based value editing
-- Event triggering buttons
-- Real-time value monitoring
-- Performance overlay
-
 ---
 
 ## Menu System
@@ -479,30 +528,64 @@ public static class SOAPKitMenu
 |--------|------------|-------------|
 | `ShowDebugWindow()` | - | Opens debug window |
 | `ShowAssetCreator()` | - | Opens asset creator |
+| `ScanCurrentScene()` | - | Analyzes current scene for SOAP usage |
+| `CleanUnusedAssets()` | - | Opens Asset Cleaner window |
+| `ListAllSOAPAssets()` | - | Generates inventory report |
 | `ValidateProject()` | - | Runs project validation |
 | `GenerateReport()` | - | Creates system report |
 | `OpenDocumentation()` | - | Opens online documentation |
+
+#### Quick Actions
+
+**🔍 Scan Current Scene**
+- Analyzes active scene for SOAP asset usage
+- Reports GameObject count with SOAP connections
+- Shows total connection count across all GameObjects
+- Provides instant overview of scene complexity
+
+**🧹 Clean Unused Assets**  
+- Opens professional Asset Cleaner window
+- Smart detection of unused SOAP assets across project
+- Advanced selection interface with tri-state functionality
+- Safe deletion with double confirmation
+- Batch operations with progress tracking
+
+**📋 List All SOAP Assets**
+- Comprehensive project inventory report
+- Categorizes Events and Variables separately  
+- Shows type information for each asset
+- Sorted alphabetically for easy navigation
 
 #### Menu Structure
 
 ```
 Tools/
 ├── SoapKit/
-│   ├── Debug Window              (Ctrl+Shift+D)
-│   ├── Asset Creator            (Ctrl+Alt+N)
+│   ├── ⚙️ Settings
+│   ├── 🐞 Debug Console         (Ctrl+Shift+D)
 │   ├── Dependency Visualizer
 │   ├── Performance Analyzer
+│   ├── Asset Creator            (Ctrl+Alt+N)
 │   ├── ─────────────────
-│   ├── Validate Project
-│   ├── Generate Report
+│   ├── Quick Actions/
+│   │   ├── 🔍 Scan Current Scene
+│   │   ├── 🧹 Clean Unused Assets
+│   │   └── 📋 List All SOAP Assets
 │   ├── ─────────────────
-│   ├── Settings
-│   └── Documentation
+│   ├── Validation/
+│   │   ├── 🔍 Find Null References
+│   │   └── 📊 Generate Usage Report
+│   ├── ─────────────────
+│   ├── Help/
+│   │   ├── 📚 Open Documentation
+│   │   ├── 🎮 Open Example Scene
+│   │   └── 💬 About SoapKit
 
 Window/
 ├── SoapKit/
 │   ├── Debug Window
 │   ├── Asset Creator
+│   ├── Asset Cleaner
 │   ├── Performance Analyzer
 │   ├── ─────────────────
 │   ├── Hierarchy Overlay/
