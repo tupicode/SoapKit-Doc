@@ -1,173 +1,176 @@
 ---
-title: SoapKit Overview
+title: Welcome to SoapKit
 sidebar_position: 1
 slug: /
 ---
 
-# SoapKit Documentation
+# Build Better Unity Games 🎮
 
-Welcome to **SoapKit**, the professional **ScriptableObject Architecture Pattern (SOAP)** implementation for Unity. SoapKit provides a complete, production-ready framework for building decoupled, event-driven game systems using Unity's powerful ScriptableObject foundation.
+SoapKit brings **professional game architecture** to Unity through the power of ScriptableObjects. Instead of tangled spaghetti code, you get clean, maintainable systems that actually scale.
 
-## What is SoapKit?
+<!-- ![SoapKit Hero Image](../static/img/soapkit-hero.png) -->
 
-SoapKit is a Unity package that implements the ScriptableObject Architecture Pattern, offering a modern approach to game architecture that emphasizes:
+## The Problem We Solve
 
-- **Decoupling**: Reduce dependencies between game systems
-- **Data-Driven Design**: Use ScriptableObjects for configuration and communication
-- **Event-Driven Architecture**: React to changes without tight coupling
-- **Professional Tooling**: Advanced editor tools for debugging and visualization
-- **Performance**: Optimized for production games
+Every Unity developer hits this wall: your game starts simple, but as features pile up, everything becomes connected to everything else. Adding new systems becomes a nightmare of dependencies, and debugging feels impossible.
 
-## Quick Start
+```csharp
+// This looks familiar, right? 😅
+public class PlayerController : MonoBehaviour 
+{
+    public UIManager ui;           // For health bars
+    public AudioManager audio;     // For sound effects  
+    public EffectsManager vfx;     // For particle effects
+    public GameManager game;       // For game state
+    public SaveManager save;       // For persistence
+    // ... and it keeps growing
+}
+```
 
-```csharp title="Creating a Health System"
-// 1. Create Variables (Create > SoapKit > Variables > Int Variable)
-[SerializeField] private IntVariable playerHealth;
-[SerializeField] private IntVariable maxHealth;
+## The SoapKit Way
 
-// 2. Create Events (Create > SoapKit > Events > Unit Event)  
-[SerializeField] private UnitGameEvent onPlayerDied;
+What if systems could communicate without knowing about each other? What if adding new features didn't require touching existing code?
 
+```csharp
+// Clean, decoupled, maintainable ✨
+public class PlayerController : MonoBehaviour 
+{
+    [SerializeField] IntVariable playerHealth;
+    [SerializeField] IntGameEvent onDamageTaken;
+    
+    public void TakeDamage(int amount) 
+    {
+        playerHealth.Subtract(amount);
+        onDamageTaken.Raise(amount);
+        // UI, audio, VFX all react automatically!
+    }
+}
+```
+
+## Your First 5 Minutes
+
+Ready to see the magic? Here's a complete health system in SoapKit:
+
+```csharp
 public class HealthSystem : MonoBehaviour
 {
+    [SerializeField] IntVariable playerHealth;
+    [SerializeField] UnitGameEvent onPlayerDied;
+    
     void Start()
     {
-        // Subscribe to health changes
-        playerHealth.OnValueChanged += OnHealthChanged;
-        
-        // Set initial values
-        maxHealth.SetValue(100);
         playerHealth.SetValue(100);
+        playerHealth.OnValueChanged += CheckForDeath;
     }
     
     public void TakeDamage(int damage)
     {
-        // Use built-in operations
-        playerHealth.Subtract(damage);
-        
-        if (playerHealth.Value <= 0)
-        {
-            onPlayerDied.Raise(); // Notify all listeners
-        }
+        playerHealth.Subtract(damage);  // Built-in math operations
     }
     
-    private void OnHealthChanged(int newHealth)
+    void CheckForDeath(int health)
     {
-        Debug.Log($"Health changed to: {newHealth}");
+        if (health <= 0) 
+            onPlayerDied.Raise();  // Everyone listening reacts automatically
     }
 }
 ```
 
-## Core Features
+That's it! Your UI, audio, VFX, and any other systems can listen to these events without creating dependencies.
 
-### **Events System**
-Professional event system with type safety, debugging tools, and performance monitoring.
+<!-- ![Health System Demo](../static/img/health-system-demo.gif) -->
+
+## What You Get
+
+### 🎯 **Two Simple Building Blocks**
+
+**Variables** - Shared data that systems can read and modify:
+```csharp
+playerHealth.Add(25);        // Built-in math operations
+playerName.Append(" VIP");   // String operations  
+playerColor.SetAlpha(0.5f);  // Type-specific helpers
+```
+
+**Events** - Notifications that systems can listen to:
+```csharp
+onPlayerDied.Raise();           // Notify everyone
+onScoreChanged.Raise(newScore); // Pass data along
+onLevelLoaded.Raise("Forest");  // Strongly typed
+```
+
+### 🔧 **Professional Tools**
+
+<!-- ![Debug Window Screenshot](../static/img/debug-window.png) -->
+
+- **Debug Window** - Watch variables change in real-time
+- **Dependency Visualizer** - See how systems connect
+- **Performance Analyzer** - Find bottlenecks instantly  
+- **Asset Creator** - Generate SOAP assets quickly
+
+### ⚡ **Built for Performance**
+
+- Zero garbage collection during gameplay
+- Faster than Unity's built-in events
+- Optimized for mobile and console
+- Production-tested architecture
+
+## Why Developers Love SoapKit
+
+### 🚀 **Faster Development**
+- Add new systems without breaking existing code
+- Test individual systems in isolation  
+- Designers can tweak values without programmer involvement
+- Parallel development - no more merge conflicts
+
+### 🐛 **Easier Debugging**
+- Watch all your game data in real-time
+- See exactly which systems are connected
+- Test events with one-click in the editor
+- Track down issues with visual dependency graphs
+
+### 📈 **Scales with Your Project**
+Whether you're building a simple mobile game or a complex RPG, SoapKit grows with you:
 
 ```csharp
-// Create typed events for any data type
-[SerializeField] private BoolGameEvent onGamePaused;
-[SerializeField] private Vector3GameEvent onPlayerMoved;
-[SerializeField] private StringGameEvent onPlayerNameChanged;
+// Same health event, infinite possibilities
+onPlayerDied.AddListener(ShowGameOverUI);     // UI System
+onPlayerDied.AddListener(PlayDeathSound);     // Audio System  
+onPlayerDied.AddListener(SpawnDeathEffect);   // VFX System
+onPlayerDied.AddListener(SaveGameState);      // Save System
+onPlayerDied.AddListener(TrackAnalytics);     // Analytics System
+// Add more systems anytime - no code changes needed!
 ```
 
-### **Variables System**
-Smart variables with constraints, validation, and specialized operations.
+## Ready to Build Better Games?
 
-```csharp
-// Variables with built-in operations
-playerScore.Add(100);           // Add to score
-playerName.Append(" (VIP)");    // String operations
-playerPosition.Normalize();     // Vector operations
-playerColor.SetAlpha(0.5f);     // Color operations
-```
+SoapKit transforms how you think about game architecture. Instead of fighting against complex dependencies, you'll build systems that naturally work together.
 
-### **Professional Editor Tools**
-Industry-level debugging and visualization tools.
+### Your Learning Path 📚
 
-- **Debug Window**: Real-time monitoring and testing
-- **Dependency Visualizer**: Interactive system relationship graphs
-- **Performance Analyzer**: Bottleneck detection and optimization
-- **Asset Creator**: Batch creation with templates
-- **Hierarchy Overlay**: Visual connection indicators
+**[🚀 Get Started](./getting-started)** - Install SoapKit and build your first system in 10 minutes
 
-## Architecture Benefits
+**[🎯 Master the Basics](./core-systems/events)** - Learn events and variables inside-out  
 
-SoapKit's architecture provides several key advantages over traditional approaches:
+**[🛠️ Build Real Systems](./examples/health-system)** - Follow along with complete examples
 
-### Traditional Approach Problems
-```csharp
-// ❌ Tight coupling
-public class PlayerHealth : MonoBehaviour 
-{
-    public UIHealthBar healthBar;     // Direct reference
-    public GameManager gameManager;   // Direct reference
-    public AudioSource audioSource;  // Direct reference
-    
-    void TakeDamage(int damage) 
-    {
-        health -= damage;
-        healthBar.UpdateHealth(health);     // Tight coupling
-        gameManager.CheckGameOver();        // Tight coupling
-        audioSource.PlayOneShot(hurtSound); // Tight coupling
-    }
-}
-```
+**[🔧 Power User Tools](./editor-tools/debug-window)** - Professional debugging and visualization
 
-### SoapKit Approach Benefits
-```csharp
-// ✅ Decoupled, flexible
-public class PlayerHealth : MonoBehaviour 
-{
-    [SerializeField] private IntVariable health;
-    [SerializeField] private IntGameEvent onHealthChanged;
-    [SerializeField] private UnitGameEvent onPlayerDied;
-    
-    void TakeDamage(int damage) 
-    {
-        health.Subtract(damage);           // Update data
-        onHealthChanged.Raise(health.Value); // Notify interested systems
-        
-        if (health.Value <= 0)
-            onPlayerDied.Raise();          // Let systems react independently
-    }
-}
-```
-
-## Package Structure
-
-```
-Assets/SoapKit/
-├── package.json              # UPM Package Manifest
-├── Runtime/
-│   ├── Events/               # GameEvent<T> implementations
-│   │   ├── GameEvent.cs      # Base event system
-│   │   ├── BoolGameEvent.cs  # Typed events
-│   │   └── ...               # All Unity types covered
-│   └── Variables/            # BaseVariable<T> implementations
-│       ├── BaseVariable.cs   # Base variable system
-│       ├── BoolVariable.cs   # Typed variables
-│       └── ...               # All Unity types with operations
-└── Examples/                 # Production-ready examples
-    ├── Scripts/              # Complete system implementations
-    └── Scenes/               # Demo scenes
-```
-
-## Unity Compatibility
-
-- **Unity Version**: 2022.3 LTS or newer
-- **Unity 6**: Full compatibility
-- **Package Manager**: UPM compatible
-- **Assembly Definition**: Clean compilation boundaries
-- **Platforms**: All Unity-supported platforms
-
-## Next Steps
-
-1. **[Why Choose SoapKit?](./why-soapkit)** - Learn about the benefits and advantages
-2. **[Getting Started](./getting-started)** - Installation and first steps
-3. **[Core Systems](./core-systems/events)** - Deep dive into Events and Variables
-4. **[Editor Tools](./editor-tools/debug-window)** - Professional debugging tools
-5. **[Examples](./examples/health-system)** - Real-world implementations
+**[🚀 Advanced Patterns](./advanced/custom-events)** - Custom implementations and optimization
 
 ---
 
-Ready to transform your Unity project architecture? Let's get started! 🚀
+### System Requirements
+
+- Unity 2022.3 LTS or newer  
+- Unity 6 fully supported
+- All platforms (PC, Mobile, Console, WebGL)
+
+### Community & Support
+
+- **GitHub** - Issues, feature requests, and discussions  
+- **Discord** - Real-time help from the community
+- **Documentation** - Complete guides and API reference
+
+---
+
+**Let's build something amazing together!** 🎮✨

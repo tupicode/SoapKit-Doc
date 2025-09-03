@@ -1,62 +1,47 @@
 ---
 title: Getting Started
-sidebar_position: 3
+sidebar_position: 2
 ---
 
-# Getting Started with SoapKit
+# Your First SoapKit System 🚀
 
-Get up and running with SoapKit in under 10 minutes! This guide will walk you through installation, your first event and variable, and a complete working example.
+Ready to experience the magic of decoupled game architecture? In the next 10 minutes, you'll build a complete health system that would make any senior developer proud.
 
-## 📦 Installation
+<!-- ![Getting Started Hero](../static/img/getting-started-hero.png) -->
 
-1. **Download from Asset Store**
-   - Search for "SoapKit" in the Asset Store
-   - Download and import the package
+## Step 1: Installation
 
-## ✅ Verify Installation
+**From Unity Asset Store:**
+1. Search for "SoapKit" 
+2. Download and import
+3. Let Unity refresh - grab some coffee ☕
 
-After installation, verify everything is working:
+**Verify Everything Works:**
+- Check `Tools > SoapKit > Debug Window` exists
+- Right-click in Project: `Create > SoapKit` should be there
 
-1. **Check Menu Items**
-   - `Tools > SoapKit > Debug Window`
-   - `Window > SoapKit > Asset Creator`
+If you see these menus, you're golden! 🎉
 
-2. **Check Create Menu**
-   - Right-click in Project window
-   - `Create > SoapKit > Variables > Int Variable`
-   - `Create > SoapKit > Events > Unit Event`
+## Step 2: Create Your First Assets
 
-If you see these menu items, you're ready to go! 🎉
+Here's where SoapKit shines. Instead of hard-coding values in scripts, we create ScriptableObject assets that multiple systems can share.
 
-## 🎯 Your First 5 Minutes with SoapKit
-
-Let's build a simple health system to understand the core concepts.
-
-### Step 1: Create Your Assets
-
-**Create a Health Variable:**
-1. Right-click in your Project window
-2. `Create > SoapKit > Variables > Int Variable`
-3. Name it `PlayerHealth`
-4. Set the value to `100` in the inspector
+**Create a Player Health Variable:**
+1. Right-click in Project → `Create > SoapKit > Variables > Int Variable`
+2. Name it `Player Health` 
+3. In the Inspector, set Value to `100`
 
 **Create Health Events:**
-1. `Create > SoapKit > Events > Int Event`
-2. Name it `OnHealthChanged`
-3. `Create > SoapKit > Events > Unit Event`  
-4. Name it `OnPlayerDied`
+1. `Create > SoapKit > Events > Unit Event` → name it `On Player Died`
+2. `Create > SoapKit > Events > Int Event` → name it `On Health Changed`
 
-Your Project should now look like this:
-```
-Assets/
-├── PlayerHealth (IntVariable)
-├── OnHealthChanged (IntGameEvent)
-└── OnPlayerDied (UnitGameEvent)
-```
+Your project now has shared data (the health variable) and communication channels (the events). Any script can reference these assets!
 
-### Step 2: Create the Health System
+<!-- ![Assets Created](../static/img/assets-created.png) -->
 
-Create a new script called `HealthSystem.cs`:
+## Step 3: Build the Health System
+
+Time for the fun part. Create a new script called `HealthSystem.cs`:
 
 ```csharp title="HealthSystem.cs"
 using UnityEngine;
@@ -64,68 +49,59 @@ using FarmGrowthToolkit.Soap;
 
 public class HealthSystem : MonoBehaviour
 {
-    [Header("Health Configuration")]
-    [SerializeField] private IntVariable health;
-    [SerializeField] private IntVariable maxHealth;
+    [Header("📊 Health Data")]
+    [SerializeField] IntVariable playerHealth;
     
-    [Header("Events")]
-    [SerializeField] private IntGameEvent onHealthChanged;
-    [SerializeField] private UnitGameEvent onPlayerDied;
+    [Header("📡 Events")]  
+    [SerializeField] UnitGameEvent onPlayerDied;
+    [SerializeField] IntGameEvent onHealthChanged;
     
     void Start()
     {
-        // Subscribe to health changes
-        health.OnValueChanged += OnHealthValueChanged;
+        // Listen for health changes
+        playerHealth.OnValueChanged += HandleHealthChanged;
         
-        // Initialize health
-        if (maxHealth != null)
-            health.SetValue(maxHealth.Value);
-        else
-            health.SetValue(100);
-    }
-    
-    void OnDestroy()
-    {
-        // Always unsubscribe to prevent memory leaks
-        if (health != null)
-            health.OnValueChanged -= OnHealthValueChanged;
+        // Set starting health
+        playerHealth.SetValue(100);
     }
     
     public void TakeDamage(int damage)
     {
-        // Use built-in math operations
-        health.Subtract(damage);
-        
-        // Check for death
-        if (health.Value <= 0)
-        {
-            health.SetValue(0); // Clamp to 0
-            onPlayerDied.Raise();
-        }
+        playerHealth.Subtract(damage);  // SoapKit's built-in math!
     }
     
     public void Heal(int amount)
     {
-        health.Add(amount);
+        playerHealth.Add(amount);
         
-        // Clamp to max health
-        if (maxHealth != null && health.Value > maxHealth.Value)
-            health.SetValue(maxHealth.Value);
+        // Cap at 100
+        if (playerHealth.Value > 100)
+            playerHealth.SetValue(100);
     }
     
-    private void OnHealthValueChanged(int newHealth)
+    void HandleHealthChanged(int newHealth)
     {
-        // Raise event for UI and other systems
-        onHealthChanged.Raise(newHealth);
+        onHealthChanged.Raise(newHealth);  // Tell everyone health changed
         
-        Debug.Log($"Health changed to: {newHealth}");
+        if (newHealth <= 0)
+            onPlayerDied.Raise();  // Tell everyone player died
+        
+        Debug.Log($"Player health: {newHealth}");
+    }
+    
+    void OnDestroy()
+    {
+        // Always clean up event subscriptions!
+        playerHealth.OnValueChanged -= HandleHealthChanged;
     }
 }
 ```
 
-### Step 3: Create the UI System
+Look how clean that is! No direct references to UI, audio, or any other systems. The health system just manages health and broadcasts what happened.
 
-Create a script called `HealthUI.cs`:
+## Step 4: Add a UI System
+
+Now let's create a UI that reacts to health changes automatically. Create `HealthUI.cs`:
 
 ```csharp title="HealthUI.cs"
 using UnityEngine;
@@ -134,226 +110,153 @@ using FarmGrowthToolkit.Soap;
 
 public class HealthUI : MonoBehaviour
 {
-    [Header("UI References")]
-    [SerializeField] private Slider healthSlider;
-    [SerializeField] private Text healthText;
+    [Header("🎨 UI Components")]
+    [SerializeField] Slider healthBar;
+    [SerializeField] Text healthText;
     
-    [Header("Health Variables")]
-    [SerializeField] private IntVariable health;
-    [SerializeField] private IntVariable maxHealth;
+    [Header("📡 Events to Listen To")]
+    [SerializeField] IntGameEvent onHealthChanged;
+    [SerializeField] UnitGameEvent onPlayerDied;
     
-    [Header("Events")]
-    [SerializeField] private IntGameEvent onHealthChanged;
-    [SerializeField] private UnitGameEvent onPlayerDied;
-    
-    void Start()
+    void OnEnable()
     {
-        // Subscribe to events
-        onHealthChanged.AddListener(UpdateHealthUI);
-        onPlayerDied.AddListener(OnPlayerDied);
-        
-        // Initialize UI
-        UpdateHealthUI(health.Value);
+        // Subscribe to events - UI reacts automatically!
+        onHealthChanged.AddListener(UpdateHealthDisplay);
+        onPlayerDied.AddListener(ShowGameOver);
     }
     
-    void OnDestroy()
+    void OnDisable()
     {
-        // Unsubscribe from events
-        if (onHealthChanged != null)
-            onHealthChanged.RemoveListener(UpdateHealthUI);
-        if (onPlayerDied != null)
-            onPlayerDied.RemoveListener(OnPlayerDied);
+        // Always clean up
+        onHealthChanged.RemoveListener(UpdateHealthDisplay);
+        onPlayerDied.RemoveListener(ShowGameOver);
     }
     
-    private void UpdateHealthUI(int currentHealth)
+    void UpdateHealthDisplay(int newHealth)
     {
-        // Update slider
-        if (healthSlider != null)
-        {
-            healthSlider.maxValue = maxHealth.Value;
-            healthSlider.value = currentHealth;
-        }
-        
-        // Update text
-        if (healthText != null)
-            healthText.text = $"{currentHealth} / {maxHealth.Value}";
+        healthBar.value = newHealth;
+        healthText.text = $"Health: {newHealth}";
     }
     
-    private void OnPlayerDied()
+    void ShowGameOver()
     {
-        Debug.Log("Game Over!");
-        // Handle game over logic here
+        healthText.text = "GAME OVER";
+        healthText.color = Color.red;
     }
 }
 ```
 
-### Step 4: Set Up the Scene
+Notice something cool? The UI system knows nothing about the health system, yet they work together perfectly through events!
 
-1. **Create the Health System GameObject:**
-   - Create empty GameObject, name it "HealthSystem"
-   - Add the `HealthSystem` component
-   - Drag your created assets to the appropriate fields
+## Step 5: Wire Everything Up
 
-2. **Create the UI:**
-   - Create a Canvas (`UI > Canvas`)
-   - Add a Slider (`UI > Slider`)
-   - Add a Text element (`UI > Text`)
-   - Create empty GameObject "HealthUI" with the `HealthUI` component
-   - Connect the UI references and SoapKit assets
+**Set up the Scene:**
+1. Create an empty GameObject called "Health Manager"
+2. Add your `HealthSystem` script 
+3. Drag your SoapKit assets into the script fields
 
-3. **Create Max Health Variable:**
-   - `Create > SoapKit > Variables > Int Variable`
-   - Name it `MaxHealth`, set to `100`
-   - Assign it to both HealthSystem and HealthUI
+**Create Simple UI:**
+1. Create a Canvas (`UI > Canvas`)
+2. Add a Slider (`UI > Slider`) - set Max Value to 100
+3. Add a Text element (`UI > Text`)
+4. Create empty GameObject called "Health UI"
+5. Add the `HealthUI` script and connect the UI references
 
-### Step 5: Test Your System
+**Connect the Events:**
+- Drag the same event assets to both the Health System and Health UI
+- This is the magic - shared events connect your systems!
 
-**Add Debug Buttons** (Optional):
+<!-- ![Scene Setup](../static/img/scene-setup.png) -->
 
-```csharp title="HealthDebugger.cs"
+## Step 6: Test It Out! 
+
+**Quick Testing with Keyboard:**
+Add this simple script for testing:
+
+```csharp title="HealthTester.cs"
 using UnityEngine;
-using FarmGrowthToolkit.Soap;
 
-public class HealthDebugger : MonoBehaviour
+public class HealthTester : MonoBehaviour
 {
-    [SerializeField] private HealthSystem healthSystem;
+    [SerializeField] HealthSystem healthSystem;
     
     void Update()
     {
-        // Test damage with 'D' key
-        if (Input.GetKeyDown(KeyCode.D))
-            healthSystem.TakeDamage(25);
+        if (Input.GetKeyDown(KeyCode.X))
+            healthSystem.TakeDamage(25);  // Press X to take damage
             
-        // Test healing with 'H' key
-        if (Input.GetKeyDown(KeyCode.H))
-            healthSystem.Heal(15);
+        if (Input.GetKeyDown(KeyCode.Z))
+            healthSystem.Heal(20);        // Press Z to heal
     }
 }
 ```
 
-**Using the SoapKit Debug Window:**
-1. `Tools > SoapKit > Debug Window`
-2. Find your events in the "Events" tab
-3. Click "Raise" to test events manually
-4. Monitor variable values in real-time
+**Or Use SoapKit's Debug Window:**
+1. Open `Tools > SoapKit > Debug Window` 
+2. Find your variables and events
+3. Watch values change in real-time
+4. Click events to test them instantly
 
-## 🎉 Congratulations!
+Hit Play and press X a few times. Watch the magic happen! ✨
 
-You've just built your first SoapKit system! Here's what you accomplished:
+<!-- ![Debug Window in Action](../static/img/debug-window-demo.gif) -->
 
-✅ **Decoupled Architecture**: Health system doesn't know about UI  
-✅ **Event-Driven Design**: UI reacts to health changes automatically  
-✅ **Data-Driven Configuration**: Health values controlled by ScriptableObjects  
-✅ **Professional Debugging**: Real-time monitoring with Debug Window  
+## 🎉 You Did It!
 
-## 🚀 Next Steps
+In just a few minutes, you built a professional-grade system architecture! Here's what makes this special:
 
-### Quick Wins (5-10 minutes each)
+✅ **Zero Dependencies** - Health system has no idea UI exists  
+✅ **Automatic Updates** - UI responds instantly when health changes  
+✅ **Designer Friendly** - Anyone can tweak values in the Inspector  
+✅ **Easily Testable** - Each system works in isolation  
+✅ **Infinitely Expandable** - Add new systems without changing existing code
 
-1. **[Explore Core Systems](./core-systems/events)** - Deep dive into Events and Variables
-2. **[Try the Debug Window](./editor-tools/debug-window)** - Professional debugging tools
-3. **[Check Examples](./examples/health-system)** - More complex real-world examples
+## The "Aha!" Moment 💡
 
-### Build Something Bigger (30-60 minutes)
+Here's what just clicked: **systems don't talk to each other directly**. They talk to shared data (Variables) and broadcast notifications (Events). It's like having a bulletin board that everyone can read and post to!
 
-1. **Add Audio System:**
-   ```csharp
-   public class AudioSystem : MonoBehaviour 
-   {
-       [SerializeField] private IntGameEvent onHealthChanged;
-       [SerializeField] private UnitGameEvent onPlayerDied;
-       
-       void Start() {
-           onHealthChanged.AddListener(PlayHealthSound);
-           onPlayerDied.AddListener(PlayDeathSound);
-       }
-       
-       private void PlayHealthSound(int health) { /* Audio code */ }
-       private void PlayDeathSound() { /* Death sound code */ }
-   }
-   ```
+## What's Next?
 
-2. **Add Particle Effects:**
-   ```csharp
-   public class EffectsSystem : MonoBehaviour 
-   {
-       [SerializeField] private IntGameEvent onHealthChanged;
-       
-       void Start() {
-           onHealthChanged.AddListener(ShowDamageEffect);
-       }
-       
-       private void ShowDamageEffect(int health) { /* VFX code */ }
-   }
-   ```
+### **Experiment Right Now (5 minutes):**
+Try adding an audio system that plays a sound when health changes:
 
-3. **Add Save System:**
-   ```csharp
-   public class SaveSystem : MonoBehaviour 
-   {
-       [SerializeField] private IntVariable health;
-       [SerializeField] private IntGameEvent onHealthChanged;
-       
-       void Start() {
-           onHealthChanged.AddListener(SaveHealth);
-           LoadHealth();
-       }
-       
-       private void SaveHealth(int h) { PlayerPrefs.SetInt("Health", h); }
-       private void LoadHealth() { health.SetValue(PlayerPrefs.GetInt("Health", 100)); }
-   }
-   ```
-
-Notice how **each system is completely independent** but works together seamlessly! 🎯
-
-## 💡 Pro Tips
-
-### **Organization Best Practices**
-```
-Assets/
-├── Data/
-│   ├── Variables/
-│   │   ├── Player/
-│   │   └── Game/
-│   └── Events/
-│       ├── Player/
-│       └── Game/
-└── Scripts/
-    ├── Systems/
-    └── UI/
+```csharp
+public class HealthAudio : MonoBehaviour 
+{
+    [SerializeField] IntGameEvent onHealthChanged;
+    [SerializeField] AudioSource audioSource;
+    
+    void OnEnable() {
+        onHealthChanged.AddListener(PlayHealthSound);
+    }
+    
+    void PlayHealthSound(int health) {
+        audioSource.Play();  // Plays automatically when health changes!
+    }
+}
 ```
 
-### **Naming Conventions**
-- Variables: `PlayerHealth`, `MaxHealth`, `GameScore`
-- Events: `OnHealthChanged`, `OnPlayerDied`, `OnLevelComplete`
-- Use descriptive names that make the purpose clear
+No changes to existing code needed! Just subscribe to the same events. 🎵
 
-### **Performance Tips**
-- Unsubscribe from events in `OnDestroy()`
-- Use `OnEnable()`/`OnDisable()` for temporary listeners
-- Group related events for better organization
+### **Level Up Your Skills:**
+- **[🎯 Master Events & Variables](./core-systems/events)** - Deep dive into the core concepts
+- **[🛠️ Build Real Systems](./examples/health-system)** - Complex examples with best practices  
+- **[🔧 Debug Like a Pro](./editor-tools/debug-window)** - Professional debugging tools
 
-## 🆘 Need Help?
-
-### **Common Issues**
-
-**Q: "Create > SoapKit menu is missing"**  
-A: Reimport the package and check Unity console for errors
-
-**Q: "Variables not updating in Inspector"**  
-A: Make sure you're in Play Mode to see runtime values
-
-**Q: "Events not firing"**  
-A: Check that listeners are added in `Start()` or `OnEnable()`
-
-**Q: "Memory leaks"**  
-A: Always unsubscribe from events in `OnDestroy()`
-
-### **Get Support**
-- **[Community Discord](https://discord.gg/soapkit)** - Get help from other developers  
-- **[GitHub Issues](https://github.com/farmgrowth/soapkit/issues)** - Report bugs and feature requests
-- **[API Documentation](./api/overview)** - Complete reference guide
+### **Join the Community:**
+- **Discord** - Get help and share your creations
+- **GitHub** - Contribute and request features
+- **Asset Store** - Leave a review if SoapKit helped you!
 
 ---
 
-**Ready to build professional Unity games?** Let's dive deeper into the [Core Systems](./core-systems/events)! 🎮
+## 💭 What Just Happened?
+
+You experienced the core philosophy of SoapKit: **systems that work together without being tangled together**. This isn't just cleaner code - it's a completely different way of thinking about game architecture.
+
+Traditional approach: *"How do I make the UI know about the health system?"*  
+SoapKit approach: *"How do I let any interested system know when health changes?"*
+
+The difference is profound. With SoapKit, you're not building dependencies - you're building a communication network where systems can join and leave conversations naturally.
+
+Welcome to professional game development! 🎮✨

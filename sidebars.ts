@@ -2,35 +2,41 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 
 const sidebars: SidebarsConfig = {
   docsSidebar: [
+    // Start Here
     'overview',
-    'why-soapkit',
     'getting-started',
+    
+    // Foundation Knowledge
     {
       type: 'category',
-      label: 'Core Systems',
+      label: '🎯 Core Concepts',
       items: [
         'core-systems/events',
         'core-systems/variables',
         'core-systems/quick-guide',
       ],
     },
+    
+    // Power User Tools
     {
       type: 'category',
-      label: 'Editor Tools',
+      label: '🔧 Editor Tools',
       items: [
         'editor-tools/debug-window',
-        'editor-tools/settings-window',
         'editor-tools/asset-creator',
-        'editor-tools/asset-cleaner',
-        'editor-tools/quick-actions',
-        'editor-tools/binding-system',
         'editor-tools/dependency-visualizer',
         'editor-tools/performance-analyzer',
+        'editor-tools/binding-system',
+        'editor-tools/asset-cleaner',
+        'editor-tools/quick-actions',
+        'editor-tools/settings-window',
       ],
     },
+    
+    // Mastery Level
     {
       type: 'category',
-      label: 'Advanced Guides',
+      label: '🚀 Advanced Topics',
       items: [
         'advanced/custom-events',
         'advanced/custom-variables',
@@ -39,9 +45,11 @@ const sidebars: SidebarsConfig = {
         'advanced/best-practices',
       ],
     },
+    
+    // Hands-On Learning
     {
       type: 'category',
-      label: 'Examples',
+      label: '🛠️ Building Systems',
       items: [
         'examples/health-system',
         'examples/inventory-system',
@@ -49,17 +57,19 @@ const sidebars: SidebarsConfig = {
         'examples/state-management',
       ],
     },
+    
+    // Reference
     {
       type: 'category',
-      label: 'API Reference',
+      label: '📚 Reference',
       items: [
         'api/overview',
         'api/variables',
         'api/events',
         'api/editor-tools',
+        'migration',
       ],
     },
-    'migration'
   ],
 };
 
