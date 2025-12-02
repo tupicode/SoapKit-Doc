@@ -1,885 +1,544 @@
 ---
-title: SOAP Binding System
+title: Binding System Inspector
 sidebar_position: 3
 ---
 
-# SOAP Binding System
+# Binding System Inspector & Tools
 
-The **SOAP Binding System** is SoapKit's most advanced feature - a professional-grade visual binding system that automatically connects SOAP assets to Unity components **without writing any code**. Think of it as **Unity's Visual Scripting for data binding**, but more powerful and performance-optimized.
+Professional Unity-native editor tools for visual binding configuration, debugging, and project-wide management.
 
-## What is the Binding System?
+:::tip Core System Documentation
+This page focuses on **editor tools and workflow**. For binding system architecture, modes, types, and API reference, see **[Binding System Documentation](../core-systems/binding)**.
+:::
 
-The Binding System eliminates the need to manually write code to connect Variables and Events to UI components, Animators, Audio Sources, and other Unity components. Instead, you use a visual editor to create bindings that are automatically maintained and optimized.
+---
 
-### Key Features
+## SOAPBind Custom Inspector
 
-- 🎨 **Visual Editor** - Drag-and-drop binding creation with real-time validation
-- ⚡ **High Performance** - Optimized update system with automatic throttling
-- 🔄 **Bidirectional Binding** - Two-way data synchronization between SOAP assets and Unity components
-- 🎛️ **Value Transformation** - Built-in curves and range mapping for sophisticated data transformation
-- 📊 **Professional Debugging** - Real-time monitoring, performance analysis, and validation tools
-- 🎯 **Smart Detection** - Automatic component and property discovery
-- 🔧 **Hot Reload** - Edit bindings during Play Mode and see changes instantly
+Visual interface for configuring data bindings between SOAP assets and Unity components with intelligent auto-detection and real-time feedback.
 
 <div style={{textAlign: 'center'}}>
-  <img src="/img/binding-system-overview.png" alt="SOAP Binding System Overview" style={{width: '100%', maxWidth: '900px'}} />
+  <img src="/img/soap-bind-component.png" alt="SOAP Bind Component Inspector" style={{width: '100%', maxWidth: '600px'}} />
 </div>
 
+### Inspector Workflow
+
+**Step 1: Add SOAPBind Component**
+```csharp
+Select GameObject → Add Component → Search "SOAP Bind"
+```
+
+**Step 2: Add Binding**
+- Click **"➕ Add Binding"**
+- New BindTarget created and auto-expanded
+
+**Step 3: Select Component**
+- **GameObject Mode**: "GameObject" dropdown option
+  - Properties: Active, Name, Tag, Layer
+  - See [GameObject binding](../core-systems/binding/types#gameobject-binding)
+- **Component Mode**: Specific component (Image, Text, Slider, etc.)
+  - Shows component-specific properties/methods
+  - See [All binding types](../core-systems/binding/types)
+
+**Step 4: Choose Property/Method**
+- Auto-filtered by selected component
+- Properties marked with 📝
+- Methods marked with ⚙️
+- Organized alphabetically
+
+**Step 5: Assign SOAP Asset**
+- Drag-and-drop from Project window
+- Object picker (filtered by type compatibility)
+- Shows asset type icon
+
+**Step 6: Configure Binding Type** (Auto-detected)
+```
+Component Type        → Suggested Type
+──────────────────────────────────────
+TextMeshProUGUI       → UI
+Image, Slider         → UI
+Transform             → Transform
+Animator              → AnimatorParameter
+Light                 → Light
+AudioSource           → AudioSource
+Renderer              → Renderer
+GameObject            → GameObject
+Other                 → Property
+```
+See [Binding Types Documentation](../core-systems/binding/types) for details.
+
+**Step 7: Select Binding Mode**
+- **VariableToTarget** - Display data (Variable → Component)
+- **TargetToVariable** - User input (Component → Variable)
+- **TwoWaySync** - Bidirectional synchronization
+- **InitialSync** - One-time setup
+
+See [Binding Modes Documentation](../core-systems/binding/modes) for detailed mode explanations with examples.
+
+**Step 8: Optional - Value Transformation**
+- Enable **"Use Transformation"**
+- Edit **AnimationCurve** for numeric conversion
+- Set **Input Range** (min, max)
+- Set **Output Range** (min, max)
+- Enable **"Invert Bool"** for boolean logic inversion
+
+See [Transformation Documentation](../core-systems/binding/transformation) for comprehensive examples.
+
+**Step 9: Optional - String Formatting**
+- Enable **"Use String Format"**
+- Enter format string: `"HP: {0:F0}%"`
+- Supports full C# composite format syntax
+- Preview shows example output
+
+See [String Formatting](../core-systems/binding/transformation#string-formatting) for format examples.
+
+**Step 10: Optional - Advanced Settings**
+- **Auto Update**: Enable/disable automatic synchronization
+- **Update Interval**: Seconds between updates (0 = event-driven)
+- **Validate On Bind**: Startup validation toggle
+- **Log Bind Events**: Debug logging toggle
+
 ---
 
-## Quick Start Guide
+### Visual Status Indicators
 
-Let's start with a simple example to understand how the Binding System works.
+Inspector displays real-time binding status:
 
-### Your First Binding in 5 Minutes
-
-**Goal:** Create a health bar that automatically updates when player health changes.
-
-**Step 1: Create the SOAP Asset**
-```csharp
-Right-click in Project → Create > SoapKit > Variables > Int Variable
-Name: "PlayerHealth"
-Set Value: 100
 ```
-
-**Step 2: Create the UI**
-```csharp
-Right-click in Hierarchy → UI > Slider
-Set Min Value: 0, Max Value: 100
-```
-
-**Step 3: Add SOAPBind Component**
-```csharp
-Select any GameObject (Slider or create empty "BindingHub")
-Add Component → Search "SOAP Bind"
-```
-
-**Step 4: Create the Binding**
-```csharp
-In SOAPBind Inspector:
-1. Click "➕ Add Binding"
-2. Drag PlayerHealth to "Source Asset"
-3. Drag Slider GameObject to "Target"
-4. Set Property to "value"
-5. Set Mode to "OneWay"
-```
-
-**Step 5: Test It**
-```csharp
-Enter Play Mode
-Select PlayerHealth asset
-Change Value in Inspector
-→ Watch Slider update automatically! ✨
-```
-
-**🎉 Congratulations!** You just created your first SOAP binding without writing any code!
-
----
-
-## Understanding the Basics
-
-### What are Bindings?
-
-Bindings are **connections** between SOAP assets (Variables/Events) and Unity components that automatically synchronize data:
-
-```csharp
-// Instead of writing this code:
-void Update() {
-    healthSlider.value = playerHealth.Value;
-    nameText.text = playerName.Value;
-    // ... dozens of similar lines
-}
-
-// You create visual bindings:
-PlayerHealth → HealthSlider.value (automatic)
-PlayerName → NameText.text (automatic) 
-```
-
-### The SOAPBind Component
-
-The **SOAPBind** component is the heart of the system. Add it to GameObjects to manage their bindings:
-
-```csharp
-SOAPBind Features:
-├── 📋 Multiple Bindings - Manage many connections in one component
-├── ⚡ Auto-Updates - Handles all synchronization automatically  
-├── 🎯 Smart Detection - Finds components and properties for you
-├── 📊 Performance Monitoring - Tracks performance in real-time
-├── 🔧 Hot Reload - Edit bindings during Play Mode
-└── 🐞 Visual Debugging - See connections in Scene view
-```
-
-<div style={{textAlign: 'center'}}>
-  <img src="/img/soap-bind-component.png" alt="SOAP Bind Component Inspector" style={{width: '400px'}} />
-</div>
-
-### Understanding the Inspector
-
-When you select a GameObject with SOAPBind, the Inspector shows:
-
-```csharp
-SOAPBind Component Inspector:
-
-🔗 Binding List (initially empty)
-   ├── [No bindings created yet]
-   
-🔧 Controls
-   ├── ➕ Add Binding        // Create new binding
-   ├── 📊 Performance Info   // Show performance stats  
-   ├── 🐞 Debug Mode         // Enable debugging
-   └── ⚙️ Auto Optimize      // Enable performance optimization
+✅ Valid      - Configuration correct, binding operational
+⚠️ Warning    - Non-critical issue (performance hint, default format)
+❌ Error      - Invalid configuration (missing refs, type mismatch)
+🔄 Processing - Currently updating (Play mode only)
+⏸️ Disabled   - Auto-update off or InitialSync completed
 ```
 
 ---
 
-## How to Organize Your Bindings
+### Performance Monitoring
 
-You can organize your bindings in different ways depending on your project needs:
+Enable **"Show Performance Metrics"** checkbox for real-time analysis:
 
-### Strategy 1: Centralized Hub (Recommended for Beginners)
-```csharp
-GameObject: "UI_BindingHub"
-└── SOAPBind (manages ALL UI bindings)
+**Per-Binding Metrics:**
+- Last execution time (milliseconds)
+- Total update count
+- Average execution time
+- Color-coded performance bar
 
-Advantages:
-✅ All bindings in one place
-✅ Easy to find and manage
-✅ Great for learning
-✅ Simple performance monitoring
+**Performance Thresholds:**
+
+| Status | Execution Time | Visual | Action |
+|--------|----------------|--------|--------|
+| Optimal | < 0.5ms | Green ████████ | None needed |
+| Acceptable | 0.5-2ms | Yellow ████████ | Monitor |
+| Warning | 2-5ms | Orange ████████ | Optimize |
+| Critical | > 5ms | Red ████████ | Fix immediately |
+
+See [Performance Optimization Guide](../core-systems/binding/performance) for detailed optimization strategies.
+
+---
+
+### Binding List Management
+
+**Visual Organization:**
+```
+┌─────────────────────────────────────────────────┐
+│ Binding 1 [▼] [✅ Valid]           [🗑️] [▶️]   │
+├─────────────────────────────────────────────────┤
+│   Component: Image (HealthBar)                  │
+│   Property:  fillAmount                         │
+│   Asset:     PlayerHealth (IntVariable)         │
+│   Mode:      VariableToTarget                   │
+│   ⚡ 0.12ms  [████░░░░░░] Updates: 145          │
+└─────────────────────────────────────────────────┘
 ```
 
-### Strategy 2: Component-Level
-```csharp
-GameObject: "HealthBar" 
-├── Slider
-└── SOAPBind (manages only health bar bindings)
+**Controls:**
+- **[▼]/[▶]** - Expand/collapse binding details
+- **[✅/❌/⚠️]** - Real-time validation status
+- **[🗑️]** - Delete binding (with confirmation)
+- **[▶️]** - Test manually (trigger single update)
+- **[📊]** - Performance metrics (Play mode)
 
-GameObject: "ScoreText"
-├── Text  
-└── SOAPBind (manages only score text bindings)
+**Multi-Binding Features:**
+- Collapsible headers for clean organization
+- Status indicator below each header
+- Performance bars inline with controls
+- Perfect vertical alignment of action buttons
 
-Advantages:
-✅ Bindings stay with components
-✅ Better for prefabs
-✅ Modular organization
+---
+
+### Context Menu Actions
+
+Right-click **SOAPBind** component header:
+
 ```
-
-### Strategy 3: System-Specific Hubs
-```csharp
-GameObject: "Audio_BindingHub"
-└── Manages all audio-related bindings
-
-GameObject: "Animation_BindingHub"  
-└── Manages all animation-related bindings
-
-GameObject: "UI_BindingHub"
-└── Manages all UI-related bindings
-
-Advantages:
-✅ Organized by system responsibility
-✅ Clear separation of concerns
-✅ Ideal for large projects
+Copy Binding Configuration    → Export to JSON clipboard
+Paste Binding Configuration   → Import from JSON clipboard
+Duplicate All Bindings        → Copy to another GameObject
+Clear All Bindings            → Remove all (confirmation required)
+Test All Bindings             → Manual trigger for all bindings
+Validate All Bindings         → Validation without execution
 ```
 
 ---
 
-## Binding Modes Explained
+### Binding Templates
 
-Now that you understand the basics, let's explore the different types of connections you can create:
+Quick-create common binding patterns:
 
-### 1. **OneWay** (Unidirectional) - Most Common
-**What it does:** Connects a SOAP Variable to a Unity property. When the variable changes, the property is automatically updated.
-
-**Direction:** SOAP Variable → Unity Property
-
-**Use cases:**
+**Available Templates:**
 ```csharp
-// Health System - Health bar that shows player life
-IntVariable playerHealth → Slider healthBar.value
-// Player loses health → Slider updates automatically
-
-// UI System - Player name in interface
-StringVariable playerName → Text nameLabel.text
-// Name changes in code → UI updates instantly
-
-// Audio System - Dynamic volume based on distance
-FloatVariable distanceVolume → AudioSource.volume
-// Player moves away → Sound gets quieter automatically
-
-// Visual System - UI color based on team
-ColorVariable teamColor → Image backgroundImage.color
-// Player changes team → Interface changes color
+Health Bar Setup     → IntVariable → Image.fillAmount + transformation
+Score Display        → IntVariable → TextMeshProUGUI.text + formatting
+Toggle Button        → BoolVariable ↔ Toggle.isOn (TwoWaySync)
+Volume Slider        → FloatVariable ↔ Slider.value (TwoWaySync)
+Event Trigger        → GameEvent → Method invocation
 ```
 
-**When to use:** When you want to **display** game information in UI or other components, but don't need the user to directly modify the values.
-
-<div style={{textAlign: 'center'}}>
-  <img src="/img/oneway-binding.png" alt="OneWay Binding Example" style={{width: '500px'}} />
-</div>
+**Usage:**
+1. Click **"📋 Use Template"** button
+2. Select template from list
+3. Binding auto-configured with recommended settings
+4. Assign specific SOAP asset and target component
 
 ---
 
-### 2. **TwoWay** (Bidirectional) - For User Input
-**What it does:** Synchronization in both directions. The variable and property stay synchronized at all times.
+### Keyboard Shortcuts
 
-**Direction:** SOAP Variable ↔ Unity Property
-
-**Use cases:**
-```csharp
-// Game Settings - Volume slider
-FloatVariable masterVolume ↔ Slider volumeSlider.value
-// Player moves slider → Variable updates → Audio changes
-// Code changes volume → Slider moves automatically
-
-// Input System - Player name input field
-StringVariable playerName ↔ InputField nameInput.text
-// Player types → Variable updates
-// System changes name → Input field updates
-
-// Debug Settings - Debug toggle
-BoolVariable showDebugInfo ↔ Toggle debugToggle.isOn
-// Player clicks toggle → Variable changes → System responds
-// Code activates debug → Toggle visual updates
-```
-
-**When to use:** For **settings**, **user controls**, and any situation where the user can modify values that should be reflected in the system and vice-versa.
-
-<div style={{textAlign: 'center'}}>
-  <img src="/img/twoway-binding.png" alt="TwoWay Binding Example" style={{width: '500px'}} />
-</div>
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/Cmd + Shift + B` | Add new binding |
+| `Delete` | Remove selected binding |
+| `Ctrl/Cmd + D` | Duplicate selected binding |
+| `Ctrl/Cmd + T` | Test selected binding |
+| `F2` | Rename binding (if named) |
 
 ---
 
-### 3. **OneTime** (Once Only) - For Setup
-**What it does:** Sets the initial property value based on the variable, but doesn't monitor changes afterwards.
+## Bind Manager Window
 
-**Direction:** SOAP Variable → Unity Property (initialization only)
-
-**Use cases:**
-```csharp
-// Initial Configuration - Player spawn position
-Vector3Variable spawnPosition → Transform.position
-// Sets initial position, but player can move freely afterwards
-
-// Visual Setup - Initial material based on level
-MaterialVariable levelMaterial → Renderer.material
-// Sets material at start, subsequent changes are independent
-
-// System Configuration - Settings that don't change during gameplay
-IntVariable maxEnemies → EnemySpawner.maxEnemies
-// Sets limit at start, doesn't change during gameplay
-```
-
-**When to use:** For **initial configurations** that don't need to change during gameplay, such as spawn positions, system configurations, or base values.
-
----
-
-### 4. **EventTrigger** (Event Trigger) - For Actions
-**What it does:** Connects SOAP Events to Unity methods. When the event is triggered, the method is executed.
-
-**Direction:** SOAP Event → Unity Method
-
-**Use cases:**
-```csharp
-// Audio System - Play sound when event happens
-GameEvent onPlayerDied → AudioSource.Play()
-// Player dies → Death sound plays automatically
-
-// Particle System - Visual effect on events
-Vector3GameEvent onSpellCast → ParticleSystem.Play()
-// Spell is cast → Particle effect at position
-
-// Animation System - Animation trigger
-StringGameEvent onActionTrigger → Animator.SetTrigger("ActionName")
-// Specific action → Corresponding animation
-
-// Save System - Auto-save at checkpoints
-GameEvent onCheckpointReached → SaveSystem.SaveGame()
-// Checkpoint reached → Game saves automatically
-```
-
-**When to use:** For **immediate reactions** to game events, such as sound effects, visuals, animations, or any action that should happen in response to a specific event.
-
----
-
-### 5. **Conditional** (Conditional) - For Special Cases
-**What it does:** Applies binding only when a condition is met. Monitors a BoolVariable as condition.
-
-**Direction:** SOAP Variable → Unity Property (when condition = true)
-
-**Use cases:**
-```csharp
-// Ability System - UI only appears when ability is active
-Condition: BoolVariable shieldActive = true
-Binding: FloatVariable shieldPower → Slider shieldBar.value
-// Shield active → Bar appears and shows power
-// Shield inactive → Bar disappears
-
-// Admin System - Controls only for administrators
-Condition: BoolVariable isAdmin = true  
-Binding: StringVariable debugMessage → Text debugLabel.text
-// Is admin → Debug messages appear
-// Not admin → Nothing happens
-
-// Combat System - Crosshair only appears in combat
-Condition: BoolVariable inCombat = true
-Binding: Vector3Variable enemyPosition → Crosshair.worldPosition
-// In combat → Crosshair follows enemy
-// Out of combat → Crosshair doesn't move
-```
-
-**When to use:** For bindings that should only work under **specific conditions**, such as debug modes, special game states, or features that depend on permissions.
-
----
-
-### 6. **GameObject Direct Control** - For GameObject Operations
-**What it does:** Provides direct control over GameObject properties like visibility, name, tag, and layer without needing to target specific components.
-
-**Direction:** SOAP Variable → GameObject Property
-
-**Supported Operations:**
-```csharp
-// Visibility Control - Show/Hide GameObjects
-BoolVariable playerAlive → GameObject.Active (UI death panel)
-// Player dies → Death panel appears automatically
-// Player respawns → Death panel disappears automatically
-
-// Dynamic Naming - Change GameObject names at runtime
-StringVariable playerName → GameObject.Name (player GameObject)
-// Player changes name → GameObject name updates in hierarchy
-// Great for debugging and organization
-
-// Tag Management - Dynamic tag assignment
-StringVariable currentTeam → GameObject.Tag (player GameObject)
-// Player switches teams → GameObject tag updates
-// Collision detection and gameplay logic responds automatically
-
-// Layer Control - Dynamic layer switching
-IntVariable renderLayer → GameObject.Layer (UI GameObject)
-// UI mode changes → GameObject moves to appropriate layer
-// Rendering order and camera culling respond automatically
-```
-
-**When to use:** For **GameObject-level operations** where you need to control the GameObject itself rather than specific components. Perfect for UI panels, debugging aids, and dynamic object organization.
-
----
-
-### 7. **Transformed** (With Transformation) - For Advanced Effects
-**What it does:** Applies mathematical transformations to values before sending them to the property.
-
-**Direction:** SOAP Variable → [Transformation] → Unity Property
-
-**Use cases:**
-```csharp
-// Health System - Percentage health with dramatic curve
-Input: IntVariable health (0-100)
-Transformation: Exponential curve to dramatize low health
-Output: Image.fillAmount (0-1)
-// 50% health → Appears as 25% on bar (more dramatic)
-
-// Audio System - Volume with distance falloff
-Input: FloatVariable distance (0-50)
-Transformation: Inverse exponential curve
-Output: AudioSource.volume (1-0)
-// Distance 10m → Volume 0.3, Distance 25m → Volume 0.05
-
-// UI System - Color based on temperature
-Input: FloatVariable temperature (-10 to 40)
-Transformation: Range mapping + Gradient
-Output: Image.color (blue to red)
-// -5°C → Light blue, 35°C → Intense red
-```
-
-**When to use:** When you need to **convert** or **enhance** value presentation, such as dramatic health bars, realistic speedometers, or any visualization that needs mathematical adjustment.
-
----
-
-## Choosing the Right Mode
-
-| **Situation** | **Recommended Mode** | **Why** |
-|---------------|---------------------|---------|
-| Health bar, Score display, Status UI | **OneWay** | Only needs to show info |
-| Settings sliders, Input fields | **TwoWay** | User needs to modify |
-| Spawn position, Initial configs | **OneTime** | Only configures at start |
-| Sound effects, Animations | **EventTrigger** | Response to events |
-| Debug panels, Admin features | **Conditional** | Only when allowed |
-| GameObject show/hide, UI panels | **GameObject Control** | Direct object manipulation |
-| Speedometer, Dramatic health bars | **Transformed** | Needs conversion |
-
----
-
-## Step-by-Step Tutorials
-
-### Tutorial 1: Complete Player HUD
-
-**Goal:** Create a complete player HUD with health, mana, score, and level display.
-
-**Step 1: Create SOAP Assets**
-```csharp
-Project Assets:
-├── PlayerHealth (IntVariable) = 100
-├── PlayerMana (IntVariable) = 50
-├── PlayerScore (IntVariable) = 0
-├── PlayerLevel (IntVariable) = 1
-└── PlayerName (StringVariable) = "Player"
-```
-
-**Step 2: Create UI Elements**
-```csharp
-Canvas Hierarchy:
-├── HealthBar (Slider: min=0, max=100)
-├── ManaBar (Slider: min=0, max=50)
-├── ScoreText (Text)
-├── LevelText (Text)  
-└── NameText (Text)
-```
-
-**Step 3: Create Binding Hub**
-```csharp
-GameObject: "PlayerHUD_BindingHub"
-Components: SOAPBind
-
-Bindings:
-1. PlayerHealth → HealthBar.value (OneWay)
-2. PlayerMana → ManaBar.value (OneWay)
-3. PlayerScore → ScoreText.text (OneWay) 
-4. PlayerLevel → LevelText.text (OneWay)
-5. PlayerName → NameText.text (OneWay)
-```
-
-**Step 4: Test**
-```csharp
-Enter Play Mode
-Change any variable value
-→ UI updates automatically!
-```
-
----
-
-### Tutorial 2: Settings Panel with Two-Way Bindings
-
-**Goal:** Create a settings panel where users can adjust game options.
-
-**Step 1: Create SOAP Assets**
-```csharp
-Settings Variables:
-├── MasterVolume (FloatVariable) = 1.0
-├── SFXVolume (FloatVariable) = 0.8
-├── FullscreenMode (BoolVariable) = true
-└── GraphicsQuality (IntVariable) = 2
-```
-
-**Step 2: Create Settings UI**
-```csharp
-Settings Panel:
-├── VolumeSlider (Slider: min=0, max=1)
-├── SFXSlider (Slider: min=0, max=1)
-├── FullscreenToggle (Toggle)
-└── QualityDropdown (Dropdown)
-```
-
-**Step 3: Create Two-Way Bindings**
-```csharp
-GameObject: "SettingsPanel"
-Components: SOAPBind
-
-Bindings:
-1. MasterVolume ↔ VolumeSlider.value (TwoWay)
-2. SFXVolume ↔ SFXSlider.value (TwoWay)
-3. FullscreenMode ↔ FullscreenToggle.isOn (TwoWay)
-4. GraphicsQuality ↔ QualityDropdown.value (TwoWay)
-```
-
-**Result:**
-```csharp
-Behavior:
-- User moves slider → Variable updates → Audio changes
-- Code changes volume → Slider moves automatically
-- Perfect synchronization in both directions
-```
-
----
-
-### Tutorial 3: Dynamic Combat System
-
-**Goal:** Create a combat system with conditional UI and event-driven effects.
-
-**Step 1: Create SOAP Assets**
-```csharp
-Combat Assets:
-├── InCombat (BoolVariable) = false
-├── EnemyHealth (IntVariable) = 100
-├── PlayerAttackPower (FloatVariable) = 25.5
-├── OnHitEnemy (GameEvent)
-└── OnEnemyDied (GameEvent)
-```
-
-**Step 2: Create Combat UI**
-```csharp
-Combat Interface:
-├── EnemyHealthBar (Slider)
-├── AttackPowerText (Text)
-├── HitEffect (ParticleSystem)
-└── DeathSound (AudioSource)
-```
-
-**Step 3: Create Mixed Bindings**
-```csharp
-GameObject: "CombatSystem_BindingHub"
-Components: SOAPBind
-
-Bindings:
-1. EnemyHealth → EnemyHealthBar.value (OneWay)
-2. PlayerAttackPower → AttackPowerText.text (OneWay)
-3. EnemyHealthBar.SetActive ← InCombat (Conditional: InCombat = true)
-4. OnHitEnemy → HitEffect.Play() (EventTrigger)
-5. OnEnemyDied → DeathSound.Play() (EventTrigger)
-```
-
-**Behavior:**
-```csharp
-Combat Flow:
-- InCombat = false → Enemy health bar hidden
-- InCombat = true → Enemy health bar appears
-- OnHitEnemy raised → Particle effect plays
-- OnEnemyDied raised → Death sound plays
-```
-
----
-
-## Advanced Features
-
-### Value Transformation System (NEW!)
-
-The SOAPBind system now includes **professional-grade value transformations** that allow you to modify values before they reach their target components. This powerful feature eliminates the need for intermediate scripts and provides sophisticated data manipulation directly in the editor.
-
-<div style={{textAlign: 'center'}}>
-  <img src="/img/binding-transformation.png" alt="Value Transformation" style={{width: '400px'}} />
-</div>
-
-#### Available Transformation Types
-
-**1. Boolean Transformations**
-Perfect for inverting logic or negating boolean values:
-
-```csharp
-// Invert Boolean (NOT operation)
-Input: BoolVariable isPlayerAlive = true
-Transform: Invert = true  
-Output: GameObject.Active (death screen) = false
-// Result: Death screen hidden when player is alive
-
-// Use Cases:
-- Show death screen when player is NOT alive
-- Enable UI when feature is NOT active
-- Hide elements when condition is NOT met
-```
-
-**2. Numeric Transformations (Animation Curves)**
-Transform numeric values using **Animation Curves** with custom input/output ranges:
-
-```csharp
-// Health Bar with Dramatic Curve
-Input: FloatVariable playerHealth (0-100)
-Input Range: 0, 100
-Animation Curve: Ease-in curve (slow start, fast end)
-Output Range: 0, 1
-Target: Image.fillAmount
-
-// Result: Health bar shows dramatic changes at low health
-// 100% health → 100% bar (normal)
-// 50% health → 30% bar (dramatic warning)  
-// 10% health → 5% bar (critical warning)
-```
-
-**Advanced Curve Applications:**
-- **Ease-Out**: Smooth deceleration for natural UI animations
-- **Exponential**: Dramatic changes at specific ranges
-- **S-Curve**: Gentle start and end, fast middle
-- **Custom**: Any mathematical function via curve points
-
-**3. String Formatting**
-Professional string formatting with **full C# format string support**:
-
-```csharp
-// Basic Formatting
-Input: IntVariable playerScore = 1250
-Format: "Score: {0}"
-Output: "Score: 1250"
-
-// Advanced Formatting Examples:
-"Health: {0:F1}%"      → "Health: 78.5%"      // 1 decimal place  
-"CPS: {0:F2}"          → "CPS: 15.67"         // 2 decimal places
-"Level {0:D2}"         → "Level 05"           // 2-digit with leading zeros
-"Progress: {0:P0}"     → "Progress: 85%"      // Percentage format
-"Currency: {0:C}"      → "Currency: $12.50"   // Currency (locale-aware)
-```
-
-#### Supported Variable Types & Transformations
-
-| **Variable Type** | **Boolean Invert** | **Numeric Transform** | **String Format** | **Common Use Cases** |
-|-------------------|--------------------|-----------------------|-------------------|---------------------|
-| **BoolVariable** | ✅ YES | ❌ No | ✅ YES | UI toggles, inverted logic, enable/disable |
-| **FloatVariable** | ❌ No | ✅ YES | ✅ YES | Health bars, progress, smooth animations |
-| **IntVariable** | ❌ No | ✅ YES | ✅ YES | Scores, counters, discrete values |
-| **StringVariable** | ❌ No | ❌ No | ✅ YES | Text display, names, descriptions |
-| **Vector2Variable** | ❌ No | ✅ YES* | ✅ YES | UI positioning, 2D coordinates |
-| **Vector3Variable** | ❌ No | ✅ YES* | ✅ YES | 3D positions, rotations, scaling |
-| **ColorVariable** | ❌ No | ✅ YES* | ❌ No | Color transitions, UI theming |
-
-*Vector and Color transformations apply to each component separately (X,Y,Z or R,G,B)
-
-#### Transformation Pipeline
-
-**Step-by-Step Process:**
-1. **Source Value** - Get value from SOAP Variable
-2. **Boolean Transform** - Apply inversion if enabled (BoolVariable only)
-3. **Numeric Transform** - Apply animation curve if enabled
-   - Map input value to Input Range (0-1)  
-   - Evaluate Animation Curve at normalized position
-   - Map curve result to Output Range
-4. **String Formatting** - Apply format string if enabled
-5. **Target Assignment** - Send final value to Unity component
-
-#### Real-World Transformation Examples
-
-**Example 1: Dramatic Health Bar**
-```csharp
-Purpose: Make health bar more visually dramatic at low health
-Input: FloatVariable health (0-100)
-Transform: Custom curve - flat until 50%, then steep drop
-Result: Player notices low health immediately
-
-Configuration:
-- Input Range: 0, 100
-- Animation Curve: Points (0,0) (0.5,0.8) (1.0,1.0) 
-- Output Range: 0, 1
-- Target: Image.fillAmount
-```
-
-**Example 2: Speedometer with Realistic Physics**
-```csharp
-Purpose: Car speedometer with realistic acceleration curve
-Input: FloatVariable velocity (0-200 km/h)
-Transform: S-curve for realistic acceleration feel
-Result: Speedometer moves like real car dashboard
-
-Configuration:
-- Input Range: 0, 200
-- Animation Curve: S-curve (slow-fast-slow)
-- Output Range: 0, 240 (speedometer goes to 240)
-- Target: Transform.rotation (needle angle)
-```
-
-**Example 3: Context-Aware Score Display**
-```csharp
-Purpose: Show score with appropriate formatting based on magnitude
-Input: IntVariable score = 1250000
-Transform: String formatting with thousands separators
-Result: Clean, readable score display
-
-Configuration:
-- String Format: "Score: {0:N0}"
-- Output: "Score: 1,250,000"
-- Target: TextMeshPro.text
-```
-
-**Example 4: Inverted UI Logic**
-```csharp
-Purpose: Show "Game Over" screen when player is NOT alive
-Input: BoolVariable isPlayerAlive = true
-Transform: Invert Boolean = true
-Result: Game Over screen hidden when alive, shown when dead
-
-Configuration:
-- Boolean Invert: true
-- Target: GameObject.Active (GameOverPanel)
-- Final Logic: Show panel when isPlayerAlive = false
-```
-
-### Performance Optimization
-
-**🚀 Event-Driven Architecture (NEW!):**
-- **Pure Event-Driven Updates** - Zero Update() polling when possible
-- **Instant Response** - Zero latency between data change and UI update  
-- **CPU Efficient** - Updates only when data actually changes
-- **Battery Friendly** - Reduced CPU usage on mobile devices
-- **Scalable Performance** - Performance doesn't degrade with binding count
-
-**Performance Thresholds for Event-Driven System:**
-- **🟢 Optimal (< 0.5ms)** - Perfect event-driven performance
-- **🟡 Good (< 2ms)** - Acceptable performance, minor optimization recommended  
-- **🔴 Needs Optimization (≥ 2ms)** - Consider simpler transformations or alternatives
-
-**Automatic Optimization:**
-- **Smart Event Detection** - Automatically uses events when available
-- **Polling Fallback** - Graceful fallback for non-event assets
-- **Update Throttling** - Prevents expensive operations from overwhelming system
-- **Change Detection** - Only update when values actually change
-- **Performance Monitoring** - Real-time tracking with color-coded feedback
-
-**Manual Control:**
-```csharp
-// Per-binding settings
-updateInterval = 0.0f;    // Event-driven (recommended)
-updateInterval = 0.016f;  // 60 FPS maximum polling
-autoUpdate = true;        // Automatic updates  
-validateOnBind = true;    // Runtime validation
-maxUpdatesPerFrame = 16;  // Event-driven throttling
-```
-
-**Performance Benefits Comparison:**
-```
-Event-Driven Bindings:     ~0.1ms per update (when events fire)
-Traditional Polling:       ~0.5ms per frame (continuous)
-CPU Usage Reduction:       80-95% improvement
-Battery Life Impact:       Significantly improved on mobile
-```
-
----
-
-## Professional Tools
-
-### Bind Manager Window
-
-The **Bind Manager** provides project-wide binding overview and management:
+Project-wide binding management and analysis tool.
 
 **Access:** `Window > SoapKit > Bind Manager`
 
 <div style={{textAlign: 'center'}}>
-  <img src="/img/bind-manager-window.png" alt="Bind Manager Window" style={{width: '100%', maxWidth: '800px'}} />
+  <img src="/img/bind-manager-window.png" alt="Bind Manager Window" style={{width: '100%', maxWidth: '900px'}} />
 </div>
 
+### Overview Tab
+
+Project statistics and binding inventory:
+
+```csharp
+// Statistics Display:
+Total SOAPBind Components:    15
+Total Active Bindings:        47
+Most Used Binding Type:       UI (28 bindings)
+Most Used Variable Type:      FloatVariable (18)
+Average Bindings/Component:   3.1
+
+// Component List:
+GameObject                Bindings    Status
+────────────────────────────────────────────
+Canvas/HealthPanel       5           ✅ All Valid
+UI/ScoreDisplay          2           ✅ All Valid
+Player/StatusEffects     8           ⚠️ 1 Warning
+```
+
+**Actions per Component:**
+- **Select** - Highlight in Hierarchy
+- **Ping** - Flash in Scene View
+- **Inspect** - Focus in Inspector
+- **Expand** - Show all bindings
+
+---
+
+### Performance Tab
+
+Real-time performance monitoring with optimization recommendations:
+
+```csharp
+// Performance Summary:
+Total Binding Cost:       2.45ms/frame
+Slowest Binding:          0.89ms (DamageNumbers.text)
+Update Frequency:         142 updates/sec
+Optimization Potential:   Save ~1.2ms with recommended changes
+
+// Performance List (sorted by cost):
+Binding                           Cost    Recommendation
+─────────────────────────────────────────────────────────
+DamageNumbers.text ← Damage      0.89ms  ⚠️ Increase interval to 0.1s
+HealthBar.fillAmount ← Health    0.45ms  ✅ Optimal performance
+ScoreText.text ← Score           0.31ms  ✅ Optimal performance
+```
+
+**Auto-Optimization Features:**
+- Detects `updateInterval=0` with high execution time
+- Suggests interval adjustments for non-critical UI
+- Identifies `InitialSync` candidates (static values)
+- Highlights redundant bindings (same source/target)
+- Color-coded performance indicators
+
+**Threshold Indicators:**
+- 🟢 **Good**: Total < 8ms per frame
+- 🟡 **Warning**: Total 8-16ms per frame
+- 🔴 **Critical**: Total > 16ms per frame
+
+See [Performance Architecture](../core-systems/binding/performance) for event-driven system details.
+
+---
+
+### Validation Tab
+
+Project-wide error detection with auto-fix capabilities:
+
+```csharp
+// Validation Summary:
+Valid Bindings:     42
+Warnings:           3
+Errors:             2
+
+// Issue List:
+⚠️ HealthText - Default string format "{0}" (unnecessary)
+⚠️ VolumeSlider - TwoWaySync + updateInterval=0 (performance)
+⚠️ BossHealth - Linear curve (default, can remove)
+
+❌ PlayButton - Missing SOAP asset reference
+❌ AmmoDisplay - Target component destroyed
+
+// Quick Actions:
+[Fix Auto-fixable Issues] [Ignore All Warnings] [Export Report]
+```
+
+**Auto-Fix Capabilities:**
+- Remove default/unnecessary formats
+- Optimize update intervals for TwoWaySync
+- Remove unnecessary linear transformations
+- Detect and remove null references
+- Reset invalid configurations
+
+---
+
+### Debugger Tab
+
+Live binding execution monitoring (Play mode only):
+
+```csharp
+// Real-time Event Log:
+[14:32:15.234] PlayerHealth changed: 75 → 50
+              ↳ HealthBar.fillAmount: 0.75 → 0.50 (0.12ms)
+              ↳ HealthText.text: "75%" → "50%" (0.08ms)
+              ↳ DamageOverlay.color updated (0.15ms)
+
+[14:32:15.891] OnPlayerDied event fired
+              ↳ GameOverPanel.SetActive(true) (0.05ms)
+              ↳ RestartButton.onClick invoked (0.03ms)
+
+// Filter Controls:
+☑ Show Variable Updates  ☑ Show Events  ☐ Performance Only
+☑ Auto-scroll           ☐ Timestamps   ☑ Highlight Errors
+```
+
 **Features:**
-- **Overview** - Project statistics and component management
-- **Performance** - Real-time performance analysis and optimization
-- **Validation** - System health and error detection
-- **Debugger** - Live binding activity monitoring
+- Real-time execution trace with timestamps
+- Value change history (before → after)
+- Per-binding execution time
+- Error/exception highlighting
+- Export log to file (CSV/JSON)
+- Pause/resume monitoring
+- Clear log buffer
 
-### Performance Monitoring
+---
 
-**Real-Time Analysis:**
-- System-wide performance metrics
-- Per-component performance breakdown
-- Binding performance visualization
-- Automatic optimization suggestions
+## Scene View Integration
 
-**Performance Thresholds:**
-- 🟢 **Good**: < 8ms total update time
-- 🟡 **Warning**: 8-16ms total update time  
-- 🔴 **Critical**: > 16ms total update time
+Enable via **"Show Gizmos In Scene"** checkbox in Inspector:
 
-### Debug Tools
+### Visual Connection Lines
 
-**Inspector Debug:**
-- Enable "Log Bind Events" for detailed logging
-- Use "Show Gizmos In Scene" for visual connections
-- Check real-time performance metrics
+**Color Coding:**
+- **Green lines** - Valid VariableToTarget bindings
+- **Blue lines** - Valid TargetToVariable bindings
+- **Purple lines** - Valid TwoWaySync bindings
+- **Gray lines** - InitialSync (completed, inactive)
+- **Red lines** - Invalid/error bindings
+- **Yellow flash** - Binding executing (Play mode)
 
-**Bind Manager Debug:**
-- Monitor Live Debugger tab during Play Mode
-- Check Validation tab for system health
-- Use Performance tab to identify bottlenecks
+### Gizmo Interactions
+
+- **Click line** → Select SOAPBind component in Inspector
+- **Hover** → Tooltip with binding details
+  ```
+  PlayerHealth → HealthBar.fillAmount
+  Mode: VariableToTarget
+  Status: ✅ Valid
+  Last Update: 0.12ms
+  ```
+- **Double-click** → Open SOAP asset in Inspector
+- **Shift+Click** → Multi-select bindings
+
+---
+
+## Integration with SoapKit Tools
+
+### Debug Console Integration
+- Bindings appear in dependency graph
+- Variable changes show all connected bindings
+- Synced performance metrics across tools
+
+See [Debug Window Documentation](./debug-window)
+
+### Asset Creator Integration
+- Create Variable → Auto-suggest binding setup wizard
+- Create Event → Auto-suggest method binding templates
+
+See [Asset Creator Documentation](./asset-creator)
+
+### Dependency Visualizer Integration
+- Binding connections in graph view
+- Highlight circular TwoWaySync dependencies
+- Export architecture diagrams with bindings
+
+See [Dependency Visualizer Documentation](./dependency-visualizer)
+
+---
+
+## Batch Operations
+
+Select multiple bindings using **Shift+Click** or **Ctrl+Click**:
+
+```
+[✓] Binding 1 - HealthBar.fillAmount
+[✓] Binding 2 - HealthText.text
+[✓] Binding 3 - HealthColor.color
+
+Available Batch Actions:
+[Set Mode: VariableToTarget]
+[Set Update Interval: 0.016]
+[Enable Transformation]
+[Disable All Selected]
+[Delete Selected]
+```
+
+**Supported Batch Operations:**
+- Change binding mode (all selected)
+- Set update interval (bulk performance tuning)
+- Enable/disable transformations
+- Enable/disable auto-update
+- Delete multiple bindings (with confirmation)
+
+---
+
+## Troubleshooting with Editor Tools
+
+### Binding Not Updating
+
+**Inspector Checks:**
+1. **Status Indicator** - Look for ❌ or ⚠️ symbols
+2. **Validation Panel** - Check error messages
+3. **Performance Metrics** - Verify update count is incrementing
+4. **Auto Update** - Ensure toggle is enabled
+5. **SOAP Asset** - Verify reference is assigned
+
+**Bind Manager Checks:**
+1. Open **Validation Tab** → Check for errors
+2. Open **Debugger Tab** (Play mode) → Monitor live updates
+3. Check **Performance Tab** → Verify binding is executing
+
+See [Full Troubleshooting Guide](../core-systems/binding/troubleshooting)
+
+### Performance Issues
+
+**Identify Bottlenecks:**
+1. Open **Bind Manager → Performance Tab**
+2. Sort by "Cost" column
+3. Look for red/orange indicators (> 2ms)
+4. Check "Optimization Potential" recommendations
+
+**Quick Fixes:**
+- Increase `updateInterval` for non-critical bindings
+- Change mode to `InitialSync` for static values
+- Simplify transformation curves
+- Reduce string formatting frequency
+
+See [Performance Optimization](../core-systems/binding/performance)
+
+### Type Compatibility Errors
+
+**Inspector Validation:**
+- **Red underline** on property field → Type mismatch
+- **Warning icon** → Automatic conversion available
+- **Error message** → Shows expected vs actual type
+
+**Solutions:**
+1. Enable **transformation** for numeric conversion
+2. Use **string formatting** for text conversion
+3. Change to compatible property/method
+4. Verify SOAP asset type matches target
+
+See [Type Compatibility](../core-systems/binding/troubleshooting#type-compatibility-errors)
 
 ---
 
 ## Best Practices
 
-### Organization
-**✅ Do This:**
+### Inspector Organization
+
+**✅ Recommended:**
 - Group related bindings on the same GameObject
-- Use descriptive names for binding GameObjects
-- Start with centralized hubs for learning
+- Use descriptive GameObject names ("UI_HealthPanel_Bindings")
+- Start with centralized hubs for small projects
 - Use component-level bindings for prefabs
+- Collapse bindings not actively being edited
 
-**❌ Avoid This:**
-- Don't create separate SOAPBind for each single binding
-- Don't mix unrelated bindings in the same component
-- Don't ignore naming conventions
+**❌ Avoid:**
+- Separate SOAPBind for each single binding
+- Mixed unrelated bindings in same component
+- Generic names like "BindingHub" without context
 
-### Performance
-**✅ Do This:**
-- Use update intervals for non-critical bindings
-- Enable auto-optimization for performance
-- Monitor performance in Bind Manager
-- Group bindings efficiently
+### Performance Monitoring
 
-**❌ Avoid This:**
-- Don't use 0ms update intervals for heavy bindings
-- Don't ignore performance warnings
-- Don't create excessive numbers of conditional bindings
+**✅ Recommended:**
+- Enable performance metrics during development
+- Monitor Bind Manager regularly
+- Set appropriate update intervals
+- Use event-driven bindings (interval = 0) when possible
+- Profile in target platform (mobile, PC, console)
 
-### Debugging
-**✅ Do This:**
-- Use descriptive binding names
-- Enable debug mode during development
-- Monitor the Bind Manager regularly
-- Test bindings in Play Mode
+**❌ Avoid:**
+- Ignoring yellow/orange performance warnings
+- Using 0ms intervals for heavy string formatting
+- Leaving debug logging enabled in builds
+- Creating excessive conditional bindings
 
-**❌ Avoid This:**
-- Don't leave debug mode on in builds
-- Don't ignore validation warnings
-- Don't skip testing edge cases
+### Debugging Workflow
 
----
+**✅ Recommended:**
+- Enable gizmos for visual debugging
+- Use Debugger Tab to monitor live updates
+- Check Validation Tab before builds
+- Export validation reports for team review
+- Test bindings in Play mode before finalizing
 
-## Troubleshooting
-
-### Common Issues
-
-**Q: "Binding not updating"**
-A: Check these in order:
-1. Is the SOAP asset assigned?
-2. Is the target component assigned?
-3. Is the property name correct?
-4. Is auto-update enabled?
-5. Check validation tab for errors
-
-**Q: "Poor performance with many bindings"**
-A: Use these optimizations:
-1. Enable auto-optimization
-2. Add update intervals to non-critical bindings
-3. Group bindings efficiently
-4. Check Performance tab for bottlenecks
-
-**Q: "Transformation not working"**
-A: Verify:
-1. Value type supports transformation
-2. Input/output ranges are correct
-3. Animation curve is properly configured
-4. Transformation is enabled
-
----
-
-## Performance Benchmarks
-
-**System Performance:**
-```
-Binding Updates per Frame: Up to 10 (configurable)
-Average Update Time: 0.2ms per binding
-Memory Overhead: ~40 bytes per binding
-Supported Bindings per Component: Unlimited
-```
-
-**Comparison with Manual Code:**
-```
-Manual Property Updates:     ~50 lines of code per UI
-SOAP Binding System:         0 lines of code (visual only)
-Performance Difference:      SOAP bindings are 2-3x faster
-Maintenance:                 90% reduction in UI code
-```
-
----
-
-The **SOAP Binding System** represents the pinnacle of Unity data binding technology. It combines the power of visual editing with enterprise-grade performance and debugging tools, enabling developers to create sophisticated UI and system interactions without writing a single line of binding code.
-
-**Master the Binding System, and you'll build Unity UIs faster than ever before!** 🎯⚡
+**❌ Avoid:**
+- Leaving "Log Bind Events" on in production
+- Ignoring validation warnings
+- Skipping edge case testing
+- Disabling auto-optimization without reason
 
 ---
 
 ## Next Steps
 
-- **[Debug Window](./debug-window)** - Monitor your bindings in real-time
-- **[Asset Creator](./asset-creator)** - Create SOAP assets for binding
-- **[Advanced Patterns](../advanced/patterns)** - Complex binding architectures
-- **[Performance Guide](../advanced/performance)** - Optimize binding performance
+**Learn Binding System:**
+- **[Binding Overview](../core-systems/binding)** - Complete system documentation
+- **[Binding Types](../core-systems/binding/types)** - Component-specific bindings
+- **[Binding Modes](../core-systems/binding/modes)** - Data flow directions
+- **[Transformation](../core-systems/binding/transformation)** - Value conversion
+- **[Performance](../core-systems/binding/performance)** - Optimization guide
+- **[API Reference](../core-systems/binding/api)** - Runtime API
+
+**Related Editor Tools:**
+- **[Debug Window](./debug-window)** - Monitor SOAP system activity
+- **[Performance Analyzer](./performance-analyzer)** - Advanced profiling
+- **[Dependency Visualizer](./dependency-visualizer)** - Architecture visualization

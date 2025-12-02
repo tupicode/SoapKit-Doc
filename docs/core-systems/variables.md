@@ -3,13 +3,13 @@ title: Variables System
 sidebar_position: 1
 ---
 
-# SoapKit Variables System
+# Variables System
 
-The **Variables System** is SoapKit's second core pillar, providing intelligent, constraint-aware ScriptableObject variables that replace traditional public fields and properties with a more robust, debuggable, and flexible approach.
+The **Variables System** is ScriptableObject Kit's second core pillar, providing intelligent, constraint-aware ScriptableObject variables that replace traditional public fields and properties with a more robust, debuggable, and flexible approach.
 
 ## Overview
 
-SoapKit Variables are ScriptableObject-based data containers that provide:
+Variables are ScriptableObject-based data containers that provide:
 
 - 🔒 **Type Safety** - Full compile-time checking and IntelliSense support
 - 🎯 **Smart Operations** - Built-in mathematical and manipulation methods for each type

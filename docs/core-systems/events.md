@@ -3,22 +3,22 @@ title: Events System
 sidebar_position: 2
 ---
 
-# SoapKit Events System
+# Events System
 
-The **Events System** is one of SoapKit’s core pillars, offering a professional, type-safe event architecture that enables decoupled communication between systems while maintaining high performance and advanced debugging capabilities.
+The **Events System** is one of ScriptableObject Kit’s core pillars, offering a professional, type-safe event architecture that enables decoupled communication between systems while maintaining high performance and advanced debugging capabilities.
 
 
 ## Overview
 
-SoapKit events are `ScriptableObject`-based channels that allow different parts of your game to communicate **without direct references**. Instead of components calling each other, they raise events that other systems can listen to.
+Events are `ScriptableObject`-based channels that allow different parts of your game to communicate **without direct references**. Instead of components calling each other, they raise events that other systems can listen to.
 
 ### Key Benefits
 
-- 🔧 **Decoupled Architecture** — No direct dependencies between systems
-- 🔒 **Type Safety** — Full compile-time validation and IntelliSense
-- ⚡ **Performance** — Lightweight, optimized for frequent usage
-- 🧠 **Debuggable** — Built-in history tracking and monitoring tools
-- 🧪 **Testable** — Easily raise events in unit tests and editor scripts
+- 🔧 **Decoupled Architecture** - No direct dependencies between systems
+- 🔒 **Type Safety** - Full compile-time validation and IntelliSense
+- ⚡ **Performance** - Lightweight, optimized for frequent usage
+- 🧠 **Debuggable** - Built-in history tracking and monitoring tools
+- 🧪 **Testable** - Easily raise events in unit tests and editor scripts
 
 
 ## Basic Usage

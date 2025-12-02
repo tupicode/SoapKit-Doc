@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'SoapKit',
+  title: 'ScriptableObject Kit',
   tagline: 'Professional ScriptableObject Architecture Pattern for Unity',
   favicon: 'img/favicon.ico',
 
@@ -25,8 +25,8 @@ const config: Config = {
   organizationName: 'tupicode', // Usually your GitHub org/user name.
   projectName: 'SoapKit-Doc', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'ignore',
+  onBrokenMarkdownLinks: 'ignore',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you

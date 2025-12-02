@@ -1,12 +1,12 @@
 # Events API Reference
 
-Complete API reference for SoapKit's event system.
+Complete API reference for ScriptableObject Kit's event system.
 
 ## Base Classes
 
 ### GameEvent&lt;T&gt;
 
-The foundation class for all typed events in SoapKit.
+The foundation class for all typed events in ScriptableObject Kit.
 
 ```csharp
 [System.Serializable]

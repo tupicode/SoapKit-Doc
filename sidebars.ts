@@ -13,6 +13,22 @@ const sidebars: SidebarsConfig = {
       items: [
         'core-systems/events',
         'core-systems/variables',
+        {
+          type: 'category',
+          label: 'Binding System',
+          link: {
+            type: 'doc',
+            id: 'core-systems/binding',
+          },
+          items: [
+            'core-systems/binding/types',
+            'core-systems/binding/modes',
+            'core-systems/binding/transformation',
+            'core-systems/binding/performance',
+            'core-systems/binding/troubleshooting',
+            'core-systems/binding/api',
+          ],
+        },
         'core-systems/quick-guide',
       ],
     },
